@@ -34,6 +34,18 @@ enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
         app/inc/app.h
+        app/inc/board.h
+        app/inc/dwt.h
+        app/inc/logger.h
+        app/inc/task_button.h
+        app/inc/task_led.h
+        app/inc/task_ui.h
+
+        app/src/app.c
+        app/src/logger.c
+        app/src/task_button.c
+        app/src/task_led.c
+        app/src/task_ui.c
 )
 
 # Add STM32CubeMX generated sources

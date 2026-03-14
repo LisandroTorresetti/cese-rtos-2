@@ -53,7 +53,7 @@ extern "C" {
 #define NUCLEO_F413ZH		(4)
 #define STM32F429I_DISCO1	(5)
 
-#define BOARD (NUCLEO_F429ZI)
+#define BOARD (NUCLEO_F446RE)
 
 /* STM32 Nucleo Boards - 64 Pins */
 #if ((BOARD == NUCLEO_F103RC) || (BOARD == NUCLEO_F401RE) || (BOARD == NUCLEO_F446RE))
@@ -68,12 +68,12 @@ extern "C" {
 #define BUTTON_PRESSED	GPIO_PIN_RESET
 #define BUTTON_HOVER	GPIO_PIN_SET
 
-#define LED_A_PIN		LD2_Pin
-#define LED_A_PORT		LD2_GPIO_Port
+#define LED_A_PIN		LD1_Pin
+#define LED_A_PORT		LD1_GPIO_Port
 #define LED_B_PIN		LD2_Pin
 #define LED_B_PORT		LD2_GPIO_Port
-#define LED_C_PIN		LD2_Pin
-#define LED_C_PORT		LD2_GPIO_Port
+#define LED_C_PIN		LD3_Pin
+#define LED_C_PORT		LD3_GPIO_Port
 
 #define LED_ON			GPIO_PIN_SET
 #define LED_OFF			GPIO_PIN_RESET

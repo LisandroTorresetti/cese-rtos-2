@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Sebastian Bedin <sebabedin@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,11 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ *
+ * @file   : ao_led.c
+ * @date   : Feb 17, 2023
  * @author : Sebastian Bedin <sebabedin@gmail.com>
+ * @version	v1.0.0
  */
 
 /********************** inclusions *******************************************/
@@ -40,86 +44,62 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-#include "board.h"
 #include "logger.h"
-#include "dwt.h"
+
+#include "ao_ui.h"
+#include "ao_led.h"
 
 /********************** macros and definitions *******************************/
 
-#define TASK_PERIOD_MS_           (1000)
+#define QUEUE_LENGTH            (1)
+#define QUEUE_ITEM_SIZE         (sizeof(msg_event_t))
 
 /********************** internal data declaration ****************************/
+
+typedef struct {
+  QueueHandle_t hqueue;
+  aoLedHandleT colours[3];
+} ao_ui_handle_t;
 
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
 
-typedef enum
-{
-  LED_COLOR_NONE,
-  LED_COLOR_RED,
-  LED_COLOR_GREEN,
-  LED_COLOR_BLUE,
-  LED_COLOR_WHITE,
-  LED_COLOR__N,
-} led_color_t;
-
-/********************** external data definition *****************************/
-
-extern SemaphoreHandle_t hsem_led;
+static ao_ui_handle_t hao;
 
 /********************** internal functions definition ************************/
 
-void led_set_colors(bool r, bool g, bool b)
-{
-  HAL_GPIO_WritePin(LED_RED_PORT, LED_RED_PIN, r ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_GREEN_PORT, LED_GREEN_PIN, g ? GPIO_PIN_SET: GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED_BLUE_PORT, LED_BLUE_PIN, b ? GPIO_PIN_SET: GPIO_PIN_RESET);
+static void task(void *argument) {
+  while (true) {
+    aoLedMessageT msg;
+    msg.ttl = 10000;
+    msg_event_t event_msg;
+
+    if (pdPASS == xQueueReceive(hao.hqueue, &event_msg, portMAX_DELAY)) {
+      aoLedHandleT haoLed = hao.colours[event_msg];
+      ao_led_send(&haoLed, &msg);
+    }
+  }
 }
 
-/********************** external functions definition ************************/
+/********************** external functions PULSEdefinition ************************/
 
-void task_led(void *argument)
-{
-  while (true)
-  {
-    led_color_t color;
+bool ao_ui_send_event(msg_event_t msg) {
+  return (pdPASS == xQueueSend(hao.hqueue, (void*)&msg, 0));
+}
 
-    if(pdTRUE == xSemaphoreTake(hsem_led, 0))
-    {
-      color = LED_COLOR_RED;
-    }
-    else
-    {
-      color = LED_COLOR_NONE;
-    }
+void ao_ui_init(aoLedHandleT colours[3]) {
+  hao.hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
+  while(NULL == hao.hqueue) {
+    // error
+  }
 
-    switch (color)
-    {
-      case LED_COLOR_NONE:
-        led_set_colors(false, false, false);
-        break;
-      case LED_COLOR_RED:
-        LOGGER_INFO("led red");
-        led_set_colors(true, false, false);
-        break;
-      case LED_COLOR_GREEN:
-        LOGGER_INFO("led green");
-        led_set_colors(false, true, false);
-        break;
-      case LED_COLOR_BLUE:
-        LOGGER_INFO("led blue");
-        led_set_colors(false, false, true);
-        break;
-      case LED_COLOR_WHITE:
-        LOGGER_INFO("led white");
-        led_set_colors(true, true, true);
-        break;
-      default:
-        break;
-    }
-
-    vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
+  BaseType_t status = xTaskCreate(task, "task_ao_ui", 128, NULL, tskIDLE_PRIORITY, NULL);
+  while (pdPASS != status) {
+    // error
+  }
+  for (uint8_t i = 0; i < 3; i++) {
+    hao.colours[i] = colours[i];
   }
 }
 

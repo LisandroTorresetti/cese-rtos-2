@@ -77,21 +77,34 @@ set(MX_LINK_DIRS
 set(MX_LINK_LIBS 
     STM32_Drivers
     ${TOOLCHAIN_LINK_LIBRARIES}
-    FreeRTOS	
+    FreeRTOS
+	
 )
 # Interface library for includes and symbols
-add_library(stm32cubemx INTERFACE)
+add_library(stm32cubemx INTERFACE
+		../../app/src/ao_ui.c
+		../../app/inc/ao_ui.h
+		../../app/src/ao_led.c
+		../../app/inc/ao_led.h)
 target_include_directories(stm32cubemx INTERFACE ${MX_Include_Dirs})
 target_compile_definitions(stm32cubemx INTERFACE ${MX_Defines_Syms})
 
 # Create STM32_Drivers static library
-add_library(STM32_Drivers OBJECT)
+add_library(STM32_Drivers OBJECT
+		../../app/src/ao_ui.c
+		../../app/inc/ao_ui.h
+		../../app/src/ao_led.c
+		../../app/inc/ao_led.h)
 target_sources(STM32_Drivers PRIVATE ${STM32_Drivers_Src})
 target_link_libraries(STM32_Drivers PUBLIC stm32cubemx)
 
 
 # Create FreeRTOS static library
-add_library(FreeRTOS OBJECT)
+add_library(FreeRTOS OBJECT
+		../../app/src/ao_ui.c
+		../../app/inc/ao_ui.h
+		../../app/src/ao_led.c
+		../../app/inc/ao_led.h)
 target_sources(FreeRTOS PRIVATE ${FreeRTOS_Src})
 target_link_libraries(FreeRTOS PUBLIC stm32cubemx)
 

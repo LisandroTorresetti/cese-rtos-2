@@ -71,7 +71,7 @@ static ao_ui_handle_t hao;
 static void task(void *argument) {
   while (true) {
     ao_led_message_t msg;
-    msg.ttl = 10000;
+    msg.ttl = 1000;
     msg_event_t event_msg;
 
     if (pdPASS == xQueueReceive(hao.hqueue, &event_msg, portMAX_DELAY)) {
@@ -97,7 +97,7 @@ void ao_ui_init(ao_led_handler_t colours[3]) {
   while (pdPASS != status) {
     // error
   }
-  
+
   for (uint8_t i = 0; i < 3; i++) {
     hao.colours[i] = colours[i];
   }

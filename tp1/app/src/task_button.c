@@ -86,7 +86,7 @@ static void button_init_(void)
 static button_type_t button_process_state(bool value)
 {
   button_type_t ret = BUTTON_TYPE_NONE;
-  if(value) {
+  if(!value) {
     button.counter += BUTTON_PERIOD_MS;
   }
   else {
@@ -108,11 +108,12 @@ void task_button(void* argument) {
     button_type_t button_type = button_process_state(button_state);
 
     if (button_type == BUTTON_TYPE_NONE) {
-      continue;
+      goto end;
     }
 
     ao_ui_send_event(button_type - 1);
 
+    end:
     vTaskDelay((TickType_t)(BUTTON_PERIOD_MS / portTICK_PERIOD_MS));
   }
 }

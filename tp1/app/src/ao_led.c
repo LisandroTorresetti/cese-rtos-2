@@ -14,37 +14,37 @@ static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
 
 static void task(void *argument)
 {
-  ao_led_handler_t* hao = argument;
-  while (true) {
-    ao_led_message_t msg;
+    ao_led_handler_t* hao = argument;
+    while (true) {
+        ao_led_message_t msg;
 
-    if (pdPASS == xQueueReceive(hao->hqueue, &msg, portMAX_DELAY)) {
-      uint16_t ttl = msg.ttl;
-      HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_SET);
-      vTaskDelay(ttl / portTICK_PERIOD_MS);
-      HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_RESET);
+        if (pdPASS == xQueueReceive(hao->hqueue, &msg, portMAX_DELAY)) {
+            uint16_t ttl = msg.ttl;
+            HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_SET);
+            vTaskDelay(ttl / portTICK_PERIOD_MS);
+            HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_RESET);
+        }
     }
-  }
 }
 
 /********************** external functions definition ************************/
 
 bool ao_led_send(ao_led_handler_t* hao, ao_led_message_t* msg) {
-  return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
+    return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
 }
 
 void ao_led_init(ao_led_handler_t* hao, ao_led_color_t color) {
-  hao->color = color;
+    hao->color = color;
 
-  hao->hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
-  while(NULL == hao->hqueue) {
-    // error
-  }
+    hao->hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
+    while(NULL == hao->hqueue) {
+        // error
+    }
 
-  BaseType_t status = xTaskCreate(task, "task_ao_led", 128, (void * const) hao, tskIDLE_PRIORITY, NULL);
-  while (pdPASS != status) {
-    // error
-  }
+    BaseType_t status = xTaskCreate(task, "task_ao_led", 128, (void * const) hao, tskIDLE_PRIORITY, NULL);
+    while (pdPASS != status) {
+        // error
+    }
 }
 
 /********************** end of file ******************************************/

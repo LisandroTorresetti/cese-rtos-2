@@ -44,7 +44,6 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-#include "logger.h"
 
 #include "ao_ui.h"
 #include "ao_led.h"
@@ -58,8 +57,12 @@
 
 typedef struct {
   QueueHandle_t hqueue;
-  aoLedHandleT colours[3];
+  //ao_led_handler_t colours[3];
 } ao_ui_handle_t;
+
+extern ao_led_handler_t led_red;
+extern ao_led_handler_t led_green;
+extern ao_led_handler_t led_blue;
 
 /********************** internal functions declaration ***********************/
 
@@ -71,24 +74,30 @@ static ao_ui_handle_t hao;
 
 static void task(void *argument) {
   while (true) {
-    aoLedMessageT msg;
+    ao_led_message_t msg;
     msg.ttl = 10000;
     msg_event_t event_msg;
 
     if (pdPASS == xQueueReceive(hao.hqueue, &event_msg, portMAX_DELAY)) {
-      aoLedHandleT haoLed = hao.colours[event_msg];
-      ao_led_send(&haoLed, &msg);
+     // ao_led_handler_t haoLed = hao.colours[event_msg];
+      if (event_msg == 0) {
+        ao_led_send(&led_green, &msg);
+      } else if (event_msg == 1) {
+        ao_led_send(&led_blue, &msg);
+      } else if (event_msg == 2) {
+        ao_led_send(&led_red, &msg);
+      }
     }
   }
 }
 
-/********************** external functions PULSEdefinition ************************/
+/********************** external functions PULSE definition ************************/
 
 bool ao_ui_send_event(msg_event_t msg) {
-  return (pdPASS == xQueueSend(hao.hqueue, (void*)&msg, 0));
+  return (pdPASS == xQueueSend(hao.hqueue, &msg, 0));
 }
 
-void ao_ui_init(aoLedHandleT colours[3]) {
+void ao_ui_init() {
   hao.hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
   while(NULL == hao.hqueue) {
     // error
@@ -98,9 +107,9 @@ void ao_ui_init(aoLedHandleT colours[3]) {
   while (pdPASS != status) {
     // error
   }
-  for (uint8_t i = 0; i < 3; i++) {
-    hao.colours[i] = colours[i];
-  }
+  //for (uint8_t i = 0; i < 3; i++) {
+  //  hao.colours[i] = colours[i];
+  //}
 }
 
 /********************** end of file ******************************************/

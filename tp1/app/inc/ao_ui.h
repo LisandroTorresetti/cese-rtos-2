@@ -1,12 +1,7 @@
-//
-// Created by Luis Carol Lugones on 15/03/2026.
-//
-
 #ifndef TP1_AO_UI_H
 #define TP1_AO_UI_H
 
 #include <stdbool.h>
-#include "ao_led.h"
 
 typedef enum {
     MSG_EVENT_BUTTON_PULSE,
@@ -16,7 +11,6 @@ typedef enum {
 
 bool ao_ui_send_event(msg_event_t msg);
 
-void ao_ui_init(aoLedHandleT colours[3]);
-
+void ao_ui_init();
 
 #endif //TP1_AO_UI_H

@@ -33,19 +33,19 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
+        app/inc/ao_led.h
+        app/inc/ao_ui.h
         app/inc/app.h
         app/inc/board.h
         app/inc/dwt.h
         app/inc/logger.h
         app/inc/task_button.h
 
+        app/src/ao_led.c
+        app/src/ao_ui.c
         app/src/app.c
         app/src/logger.c
         app/src/task_button.c
-        app/src/ao_ui.c
-        app/inc/ao_ui.h
-        app/src/ao_led.c
-        app/inc/ao_led.h
 )
 
 # Add STM32CubeMX generated sources

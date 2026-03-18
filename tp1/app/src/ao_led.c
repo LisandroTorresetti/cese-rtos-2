@@ -2,12 +2,11 @@
 
 #include "board.h"
 #include "main.h"
-#include "stm32f4xx_hal_gpio.h"
 
 #define TASK_PERIOD_MS_           (1000)
 
 #define QUEUE_LENGTH            (1)
-#define QUEUE_ITEM_SIZE         (sizeof(aoLedMessageT))
+#define QUEUE_ITEM_SIZE         (sizeof(ao_led_message_t))
 
 static GPIO_TypeDef* led_port_[] = {LED_RED_PORT, LED_GREEN_PORT,  LED_BLUE_PORT};
 static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
@@ -15,13 +14,14 @@ static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
 
 static void task(void *argument)
 {
-  aoLedHandleT* hao = (aoLedHandleT*)argument;
+  ao_led_handler_t* hao = argument;
   while (true) {
-    aoLedMessageT msg;
+    ao_led_message_t msg;
+
     if (pdPASS == xQueueReceive(hao->hqueue, &msg, portMAX_DELAY)) {
       uint16_t ttl = msg.ttl;
       HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_SET);
-      vTaskDelay((TickType_t)(ttl / portTICK_PERIOD_MS));
+      vTaskDelay(ttl / portTICK_PERIOD_MS);
       HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_RESET);
     }
   }
@@ -29,11 +29,11 @@ static void task(void *argument)
 
 /********************** external functions definition ************************/
 
-bool ao_led_send(aoLedHandleT* hao, aoLedMessageT* msg) {
+bool ao_led_send(ao_led_handler_t* hao, ao_led_message_t* msg) {
   return (pdPASS == xQueueSend(hao->hqueue, (void*)msg, 0));
 }
 
-void ao_led_init(aoLedHandleT* hao, aoLedColorT color) {
+void ao_led_init(ao_led_handler_t* hao, ao_led_color_t color) {
   hao->color = color;
 
   hao->hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);

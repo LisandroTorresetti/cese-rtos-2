@@ -107,7 +107,11 @@ void task_button(void* argument) {
 
     button_type_t button_type = button_process_state(button_state);
 
-    ao_ui_send_event(button_type);
+    if (button_type == BUTTON_TYPE_NONE) {
+      continue;
+    }
+
+    ao_ui_send_event(button_type - 1);
 
     vTaskDelay((TickType_t)(BUTTON_PERIOD_MS / portTICK_PERIOD_MS));
   }

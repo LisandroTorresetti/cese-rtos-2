@@ -57,12 +57,8 @@
 
 typedef struct {
   QueueHandle_t hqueue;
-  //ao_led_handler_t colours[3];
+  ao_led_handler_t colours[3];
 } ao_ui_handle_t;
-
-extern ao_led_handler_t led_red;
-extern ao_led_handler_t led_green;
-extern ao_led_handler_t led_blue;
 
 /********************** internal functions declaration ***********************/
 
@@ -79,14 +75,8 @@ static void task(void *argument) {
     msg_event_t event_msg;
 
     if (pdPASS == xQueueReceive(hao.hqueue, &event_msg, portMAX_DELAY)) {
-     // ao_led_handler_t haoLed = hao.colours[event_msg];
-      if (event_msg == 0) {
-        ao_led_send(&led_green, &msg);
-      } else if (event_msg == 1) {
-        ao_led_send(&led_blue, &msg);
-      } else if (event_msg == 2) {
-        ao_led_send(&led_red, &msg);
-      }
+      ao_led_handler_t haoLed = hao.colours[event_msg];
+      ao_led_send(&haoLed, &msg);
     }
   }
 }
@@ -97,7 +87,7 @@ bool ao_ui_send_event(msg_event_t msg) {
   return (pdPASS == xQueueSend(hao.hqueue, &msg, 0));
 }
 
-void ao_ui_init() {
+void ao_ui_init(ao_led_handler_t colours[3]) {
   hao.hqueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
   while(NULL == hao.hqueue) {
     // error
@@ -107,9 +97,10 @@ void ao_ui_init() {
   while (pdPASS != status) {
     // error
   }
-  //for (uint8_t i = 0; i < 3; i++) {
-  //  hao.colours[i] = colours[i];
-  //}
+  
+  for (uint8_t i = 0; i < 3; i++) {
+    hao.colours[i] = colours[i];
+  }
 }
 
 /********************** end of file ******************************************/

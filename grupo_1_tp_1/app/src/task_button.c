@@ -58,18 +58,19 @@
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_button;
-
 /********************** internal functions definition ************************/
 
-typedef enum
-{
+typedef enum {
   BUTTON_TYPE_NONE,
   BUTTON_TYPE_PULSE,
   BUTTON_TYPE_SHORT,
   BUTTON_TYPE_LONG,
 } button_type_t;
 
+/**
+ * @brief Categorizes a button press duration into a button_type_t.
+ *
+ */
 static button_type_t categorize(uint32_t value) {
   return (value > BUTTON_PULSE_TIMEOUT) + (value >= BUTTON_SHORT_TIMEOUT) + (value >= BUTTON_LONG_TIMEOUT);
 }
@@ -78,21 +79,21 @@ static struct {
     uint32_t counter;
 } button;
 
-static void button_init_(void)
-{
+static void button_init_(void) {
   button.counter = 0;
 }
 
-static button_type_t button_process_state(bool value)
-{
+static button_type_t button_process_state(bool value) {
   button_type_t ret = BUTTON_TYPE_NONE;
   if(!value) {
     button.counter += BUTTON_PERIOD_MS;
   }
+
   else {
     ret = categorize(button.counter);
     button.counter = 0;
   }
+
   return ret;
 }
 
@@ -101,19 +102,15 @@ static button_type_t button_process_state(bool value)
 void task_button(void* argument) {
   button_init_();
 
-  while(true)
-  {
+  while(true) {
     GPIO_PinState button_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
 
     button_type_t button_type = button_process_state(button_state);
 
-    if (button_type == BUTTON_TYPE_NONE) {
-      goto end;
+    if (button_type != BUTTON_TYPE_NONE) {
+      ao_ui_send_event(button_type - 1);
     }
 
-    ao_ui_send_event(button_type - 1);
-
-    end:
     vTaskDelay((TickType_t)(BUTTON_PERIOD_MS / portTICK_PERIOD_MS));
   }
 }

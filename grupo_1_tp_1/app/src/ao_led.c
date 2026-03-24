@@ -1,15 +1,12 @@
 #include "ao_led.h"
-
 #include "board.h"
 #include "main.h"
-
-#define TASK_PERIOD_MS_           (1000)
 
 #define QUEUE_LENGTH            (1)
 #define QUEUE_ITEM_SIZE         (sizeof(ao_led_message_t))
 
-static GPIO_TypeDef* led_port_[] = {LED_RED_PORT, LED_GREEN_PORT,  LED_BLUE_PORT};
-static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
+static GPIO_TypeDef* led_port[] = {LED_RED_PORT, LED_GREEN_PORT,  LED_BLUE_PORT};
+static uint16_t led_pin[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
 
 
 static void task(void *argument)
@@ -19,10 +16,9 @@ static void task(void *argument)
         ao_led_message_t msg;
 
         if (pdPASS == xQueueReceive(hao->hqueue, &msg, portMAX_DELAY)) {
-            uint16_t ttl = msg.ttl;
-            HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_SET);
-            vTaskDelay(ttl / portTICK_PERIOD_MS);
-            HAL_GPIO_WritePin(led_port_[hao->color], led_pin_[hao->color], GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(led_port[hao->color], led_pin[hao->color], GPIO_PIN_SET);
+            vTaskDelay(msg.blink_time / portTICK_PERIOD_MS);
+            HAL_GPIO_WritePin(led_port[hao->color], led_pin[hao->color], GPIO_PIN_RESET);
         }
     }
 }

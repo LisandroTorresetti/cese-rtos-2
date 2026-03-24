@@ -6,7 +6,7 @@
 #include "cmsis_os.h"
 
 typedef struct {
-    uint16_t ttl;
+    uint16_t blink_time;
 } ao_led_message_t;
 
 typedef enum {

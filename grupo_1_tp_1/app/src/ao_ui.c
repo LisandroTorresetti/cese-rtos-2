@@ -52,6 +52,7 @@
 
 #define QUEUE_LENGTH            (1)
 #define QUEUE_ITEM_SIZE         (sizeof(msg_event_t))
+#define BLINK_PERIOD_MS         1000
 
 /********************** internal data declaration ****************************/
 
@@ -71,7 +72,7 @@ static ao_ui_handle_t hao;
 static void task(void *argument) {
   while (true) {
     ao_led_message_t msg;
-    msg.ttl = 1000;
+    msg.blink_time = BLINK_PERIOD_MS;
     msg_event_t event_msg;
 
     if (pdPASS == xQueueReceive(hao.hqueue, &event_msg, portMAX_DELAY)) {
